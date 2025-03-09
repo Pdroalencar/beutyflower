@@ -11,9 +11,19 @@ db.serialize(() => {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nome TEXT NOT NULL,
             email TEXT UNIQUE NOT NULL,
-            senha TEXT NOT NULL
+            senha TEXT NOT NULL,
+            role TEXT DEFAULT 'cliente'
         )
     `);
+
+    // Tenta adicionar a coluna 'role' se ela ainda não existir
+    db.run(`
+        ALTER TABLE usuarios ADD COLUMN role TEXT DEFAULT 'cliente'
+    `, (err) => {
+        if (err && !err.message.includes('duplicate column')) {
+            console.error('Erro ao adicionar coluna role:', err);
+        }
+    });
 
     db.run(`
         CREATE TABLE IF NOT EXISTS agendamentos (
