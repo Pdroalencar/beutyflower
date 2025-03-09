@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeautyFlow - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --cor-primaria: #6C63FF;
+            --cor-secundaria: #FF6584;
+            --gradiente: linear-gradient(45deg, var(--cor-primaria), var(--cor-secundaria));
+            --fundo-escuro: #1a1a1a;
+            --fundo-claro: #f8f9fa;
+            --sombra: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+            background: var(--fundo-claro);
+        }
+
+        .sidebar {
+            width: 250px;
+            background: var(--fundo-escuro);
+            color: white;
+            padding: 20px;
+            box-shadow: var(--sombra);
+        }
+
+        .sidebar h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--cor-primaria);
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            margin: 15px 0;
+        }
+
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 8px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .sidebar ul li a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--cor-primaria);
+        }
+
+        .sidebar ul li a i {
+            margin-right: 10px;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            background: var(--fundo-claro);
+        }
+
+        .welcome-message {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: var(--sombra);
+            margin-bottom: 20px;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .welcome-message h1 {
+            font-size: 2.5rem;
+            color: var(--fundo-escuro);
+            margin-bottom: 10px;
+        }
+
+        .welcome-message p {
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: var(--sombra);
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: var(--fundo-escuro);
+        }
+
+        .card p {
+            margin: 5px 0;
+            color: #555;
+        }
+
+        .card .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .card .status.confirmado {
+            background: #e3fcef;
+            color: #36b37e;
+        }
+
+        .card .status.pendente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .btn-beauty {
+            background: var(--gradiente);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .btn-beauty:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+        }
+
+        .btn-beauty i {
+            margin-right: 10px;
+        }
+
+        /* Estilos do Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow: auto;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .modal-content .close {
+            float: right;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-content .close:hover {
+            color: #000;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+  </style>
+</head>
+<body>
+    <!-- Barra Lateral -->
+    <div class="sidebar">
+        <h2>BeautyFlow</h2>
+        <ul>
+            <li><a href="#" onclick="mostrarDashboard()"><i class="fas fa-home"></i>Dashboard</a></li>
+            <li><a href="#" onclick="mostrarAgendamentos()"><i class="fas fa-calendar-alt"></i>Agendamentos</a></li>
+            <li><a id="financeiroLink" href="#" onclick="mostrarFinanceiro()"><i class="fas fa-wallet"></i>Financeiro</a></li>
+            <li><a href="#" onclick="mostrarConfiguracoes()"><i class="fas fa-cog"></i>Configurações</a></li>
+        </ul>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <div class="main-content">
+        <!-- Mensagem de Boas-Vindas -->
+        <div class="welcome-message">
+            <h1 id="boasVindas">Bem-vindo(a), Maria!</h1>
+            <p>Hoje é um ótimo dia para brilhar! ✨</p>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card">
+                        <h3>Cortes Realizados</h3>
+                        <p>📊 <span id="cortesRealizados">120</span></p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <h3>Clientes Ativos</h3>
+                        <p>👥 <span id="clientesAtivos">85</span></p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <h3>Agendamentos Marcados</h3>
+                        <p>📅 <span id="agendamentosMarcados">15</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Agendamentos -->
+        <div id="agendamentos" style="display: none;">
+            <div class="agendamentos" id="listaAgendamentos">
+                <!-- Cards serão inseridos aqui via JavaScript -->
+            </div>
+            <button class="btn btn-beauty mt-4" onclick="abrirModalNovoAgendamento()">
+                <i class="fas fa-plus"></i>Novo Agendamento
+            </button>
+        </div>
+
+        <!-- Financeiro -->
+        <div id="financeiro" style="display: none;">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card">
+                        <h3>Faturamento Mensal</h3>
+                        <p>💰 <span id="faturamentoMensal">R$ 5.000,00</span></p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <h3>Despesas</h3>
+                        <p>💸 <span id="despesas">R$ 2.000,00</span></p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <h3>Lucro</h3>
+                        <p>📈 <span id="lucro">R$ 3.000,00</span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4">
+                <h2>Gráfico de Faturamento</h2>
+                <canvas id="graficoFaturamento" width="400" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- Configurações -->
+        <div id="configuracoes" style="display: none;">
+            <h2>Configurações</h2>
+            <form id="formConfiguracoes">
+                <div class="mb-3">
+                    <label for="nomeUsuario" class="form-label">Nome</label>
+                    <input type="text" id="nomeUsuario" class="form-control" placeholder="Digite seu nome" required>
+                </div>
+                <div class="mb-3">
+                    <label for="emailUsuario" class="form-label">Email</label>
+                    <input type="email" id="emailUsuario" class="form-control" placeholder="Digite seu email" required>
+                </div>
+                <div class="mb-3">
+                    <label for="senhaUsuario" class="form-label">Nova Senha</label>
+                    <input type="password" id="senhaUsuario" class="form-control" placeholder="Digite uma nova senha">
+                </div>
+                <button type="submit" class="btn btn-beauty">
+                    <i class="fas fa-save me-2"></i>Salvar Alterações
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Novo Agendamento -->
+    <div id="modalNovoAgendamento" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="fecharModal()">&times;</span>
+            <h2>Novo Agendamento</h2>
+            <form id="formNovoAgendamento">
+                <div class="mb-3">
+                    <label for="nomeCliente" class="form-label">Nome do Cliente</label>
+                    <input type="text" id="nomeCliente" class="form-control" placeholder="Digite o nome do cliente" required>
+                </div>
+                <div class="mb-3">
+                    <label for="telefoneCliente" class="form-label">Telefone</label>
+                    <input type="tel" id="telefoneCliente" class="form-control" placeholder="Digite o telefone" required>
+                </div>
+                <div class="mb-3">
+                    <label for="dataAgendamento" class="form-label">Data</label>
+                    <input type="date" id="dataAgendamento" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="horarioAgendamento" class="form-label">Horário</label>
+                    <input type="time" id="horarioAgendamento" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-beauty w-100">
+                    <i class="fas fa-calendar-check me-2"></i>Confirmar Agendamento
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Função para decodificar o token JWT
+        function decodificarToken(token) {
+            const base64Url = token.split('.')[1]; // Pega a parte do payload
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/'); // Converte para base64 padrão
+            const payload = JSON.parse(atob(base64)); // Decodifica o payload
+            return payload;
+        }
+
+        // Verificar autenticação e papel do usuário
+        document.addEventListener('DOMContentLoaded', function () {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login.html';
+            } else {
+                const payload = decodificarToken(token); // Decodifica o token
+                const role = payload.role; // Extrai o papel do usuário
+                const nomeUsuario = payload.nome; // Extrai o nome do payload
+
+                // Oculta a aba de Financeiro se o usuário não for admin
+                if (role !== 'admin') {
+                    document.getElementById('financeiroLink').style.display = 'none';
+                }
+
+                // Atualiza a mensagem de boas-vindas com o nome do usuário
+                const boasVindas = document.getElementById('boasVindas');
+                if (boasVindas) {
+                    boasVindas.textContent = `Bem-vindo(a), ${nomeUsuario || 'Usuário'}!`;
+                }
+            }
+        });
+
+        // Função para mostrar o dashboard
+        function mostrarDashboard() {
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('agendamentos').style.display = 'none';
+            document.getElementById('financeiro').style.display = 'none';
+            document.getElementById('configuracoes').style.display = 'none';
+        }
+
+        // Função para mostrar a lista de agendamentos
+        function mostrarAgendamentos() {
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('agendamentos').style.display = 'block';
+            document.getElementById('financeiro').style.display = 'none';
+            document.getElementById('configuracoes').style.display = 'none';
+        }
+
+        // Função para mostrar o financeiro
+        function mostrarFinanceiro() {
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('agendamentos').style.display = 'none';
+            document.getElementById('financeiro').style.display = 'block';
+            document.getElementById('configuracoes').style.display = 'none';
+            carregarGraficoFaturamento(); // Carrega o gráfico de faturamento
+        }
+
+        // Função para mostrar as configurações
+        function mostrarConfiguracoes() {
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('agendamentos').style.display = 'none';
+            document.getElementById('financeiro').style.display = 'none';
+            document.getElementById('configuracoes').style.display = 'block';
+            carregarDadosUsuario(); // Carrega os dados do usuário
+        }
+
+        // Função para carregar agendamentos
+        function carregarAgendamentos() {
+            fetch('/agendamentos', {
+                headers: { 'Authorization': localStorage.getItem('token') }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const listaAgendamentos = document.getElementById('listaAgendamentos');
+                listaAgendamentos.innerHTML = data.map(agendamento => `
+                    <div class="card-agendamento">
+                        <h3>${agendamento.cliente_nome}</h3>
+                        <p>${agendamento.data} - ${agendamento.horario}</p>
+                        <p>Status: <span class="status confirmado">Confirmado</span></p>
+                        <button class="btn-beauty" onclick="editarAgendamento(${agendamento.id})">
+                            <i class="fas fa-edit"></i>Editar
+                        </button>
+                        <button class="btn-beauty" onclick="excluirAgendamento(${agendamento.id})">
+                            <i class="fas fa-trash"></i>Excluir
+                        </button>
+                    </div>
+                `).join('');
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao carregar agendamentos');
+            });
+        }
+
+        // Função para carregar o gráfico de faturamento
+        function carregarGraficoFaturamento() {
+            const ctx = document.getElementById('graficoFaturamento').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+                    datasets: [{
+                        label: 'Faturamento Mensal',
+                        data: [5000, 6000, 5500, 7000, 6500, 8000],
+                        borderColor: 'rgba(108, 99, 255, 1)',
+                        borderWidth: 2,
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Função para carregar os dados do usuário
+        function carregarDadosUsuario() {
+            const token = localStorage.getItem('token');
+            fetch('/usuario', {
+                headers: { 'Authorization': token }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('nomeUsuario').value = data.nome;
+                document.getElementById('emailUsuario').value = data.email;
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao carregar dados do usuário');
+            });
+        }
+
+        // Função para salvar as configurações
+        document.getElementById('formConfiguracoes').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const nome = document.getElementById('nomeUsuario').value;
+            const email = document.getElementById('emailUsuario').value;
+            const senha = document.getElementById('senhaUsuario').value;
+
+            fetch('/atualizar-usuario', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
+                },
+                body: JSON.stringify({ nome, email, senha })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Configurações salvas com sucesso!');
+                } else {
+                    alert('Erro ao salvar configurações: ' + data.error);
+                }
+            });
+        });
+
+        // Funções anteriores (abrirModalNovoAgendamento, fecharModal, editarAgendamento, excluirAgendamento)
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>

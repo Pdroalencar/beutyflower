@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeautyFlow - Agendamento Inteligente</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --cor-primaria: #6C63FF;
+            --cor-secundaria: #FF6584;
+            --gradiente: linear-gradient(45deg, var(--cor-primaria), var(--cor-secundaria));
+        }
+
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--cor-primaria) !important;
+        }
+
+        .card-agendamento {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: none;
+            transition: transform 0.3s;
+        }
+
+        .card-agendamento:hover {
+            transform: translateY(-5px);
+        }
+
+        .btn-beauty {
+            background: var(--gradiente);
+            border: none;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-control:focus {
+            border-color: var(--cor-primaria);
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.25);
+        }
+
+        .comprovante-link {
+            color: var(--cor-primaria);
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .dark-mode {
+            background: #1a1a1a;
+            color: white;
+        }
+
+        .dark-mode .card-agendamento {
+            background: #2d2d2d;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-spa me-2"></i>BeautyFlow
+            </a>
+            <button class="btn btn-beauty ms-auto" onclick="toggleDarkMode()">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button id="logoutButton" class="btn btn-danger">Sair</button>
+        </div>
+    </nav>
+
+    <!-- Conteúdo Principal -->
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card-agendamento p-4 mb-4">
+                    <h2 class="text-center mb-4">📅 Agendar Serviço</h2>
+                    
+                    <form id="agendamentoForm">
+                        <div class="mb-4">
+                            <label class="form-label">Nome Completo</label>
+                            <input type="text" id="nome" class="form-control form-control-lg" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Telefone</label>
+                            <input type="tel" id="telefone" class="form-control form-control-lg" pattern="[0-9]{11}" required>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Data</label>
+                                <input type="date" id="data" class="form-control form-control-lg" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Horário</label>
+                                <input type="time" id="horario" class="form-control form-control-lg" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-beauty w-100 py-3">
+                            <i class="fas fa-calendar-check me-2"></i>Confirmar Agendamento
+                        </button>
+                    </form>
+
+                    <div id="mensagem" class="mt-4" style="display: none;"></div>
+                </div>
+
+                <a href="/agendamentos.html" class="btn btn-outline-secondary w-100">
+                    <i class="fas fa-list-alt me-2"></i>Ver Todos Agendamentos
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Verificar autenticação
+        document.addEventListener('DOMContentLoaded', function () {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login.html';
+            }
+        });
+
+        // Dark Mode Toggle
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+        }
+
+        // Logout
+        document.getElementById('logoutButton').addEventListener('click', function () {
+            localStorage.removeItem('token');
+            window.location.href = '/login.html';
+        });
+
+        // Enviar agendamento
+        document.getElementById('agendamentoForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const nome = document.getElementById('nome').value;
+            const telefone = document.getElementById('telefone').value;
+            const data = document.getElementById('data').value;
+            const horario = document.getElementById('horario').value;
+
+            fetch('/agendar', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token') // Envia o token
+                },
+                body: JSON.stringify({ nome, telefone, data, horario })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Agendamento realizado com sucesso!');
+                } else {
+                    alert('Erro ao agendar: ' + data.error);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
