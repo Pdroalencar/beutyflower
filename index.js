@@ -135,7 +135,8 @@ app.post('/login', (req, res) => {
                         role: userRole 
                     };
                     
-                    console.log('Gerando token JWT com payload:', payload);
+                    console.log('Payload antes de gerar o token:', payload);
+                    console.log('Tipo de SECRET_KEY:', typeof SECRET_KEY);
                     
                     const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '1h' });
                     
