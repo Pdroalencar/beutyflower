@@ -104,14 +104,27 @@ app.post('/login', (req, res) => {
                 // Verificar se o campo role existe, se não, definir como 'cliente'
                 const userRole = row.role || 'cliente';
                 
-                // Gerar token JWT com o papel (role)
-                const token = jwt.sign(
-                    { id: row.id, email: row.email, role: userRole }, 
-                    SECRET_KEY, 
-                    { expiresIn: '1h' }
-                );
+                // Garantir que os dados sejam do tipo correto
+                const userId = parseInt(row.id, 10) || 0;
+                const userEmail = String(row.email || '');
                 
-                res.json({ success: true, token });
+                try {
+                    // Gerar token JWT com o papel (role) - corrigido
+                    const token = jwt.sign(
+                        { 
+                            id: userId, 
+                            email: userEmail, 
+                            role: userRole 
+                        }, 
+                        SECRET_KEY, 
+                        { expiresIn: '1h' }
+                    );
+                    
+                    res.json({ success: true, token });
+                } catch (jwtError) {
+                    console.error('Erro ao gerar token JWT:', jwtError);
+                    return res.status(500).json({ error: 'Erro ao processar login' });
+                }
             })
             .catch(err => {
                 console.error('Erro ao verificar senha:', err);
