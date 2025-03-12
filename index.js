@@ -83,6 +83,13 @@ app.post('/register', (req, res) => {
 app.post('/login', (req, res) => {
     const { email, senha } = req.body;
     
+    // Verificar se email e senha estão preenchidos
+    if (!email || !senha) {
+        return res.status(400).json({ error: 'Email e senha são obrigatórios' });
+    }
+    
+    console.log(`Tentativa de login para: ${email}`); // Log para depuração
+    
     // Buscar usuário pelo email
     db.get('SELECT * FROM usuarios WHERE email = ?', [email], (err, row) => {
         if (err) {
@@ -90,13 +97,25 @@ app.post('/login', (req, res) => {
             return res.status(500).json({ error: 'Erro interno do servidor' });
         }
         
+        // Se não encontrou o usuário
         if (!row) {
+            console.log(`Usuário não encontrado: ${email}`);
             return res.status(400).json({ error: 'Email ou senha incorretos' });
+        }
+        
+        console.log(`Usuário encontrado: ${email}, verificando senha...`);
+        
+        // Verificar se a senha armazenada está em formato hash
+        if (!row.senha || row.senha.length < 20) {
+            console.error(`Formato de senha inválido para usuário: ${email}`);
+            return res.status(500).json({ error: 'Erro no formato da senha armazenada' });
         }
         
         // Verificar senha
         bcrypt.compare(senha, row.senha)
             .then(senhaValida => {
+                console.log(`Resultado da verificação da senha: ${senhaValida}`);
+                
                 if (!senhaValida) {
                     return res.status(400).json({ error: 'Email ou senha incorretos' });
                 }
@@ -109,16 +128,16 @@ app.post('/login', (req, res) => {
                 const userEmail = String(row.email || '');
                 
                 try {
-                    // Gerar token JWT com o papel (role) - corrigido
-                    const token = jwt.sign(
-                        { 
-                            id: userId, 
-                            email: userEmail, 
-                            role: userRole 
-                        }, 
-                        SECRET_KEY, 
-                        { expiresIn: '1h' }
-                    );
+                    // Gerar token JWT com o papel (role)
+                    const payload = { 
+                        id: userId, 
+                        email: userEmail, 
+                        role: userRole 
+                    };
+                    
+                    console.log('Gerando token JWT com payload:', payload);
+                    
+                    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '1h' });
                     
                     res.json({ success: true, token });
                 } catch (jwtError) {
